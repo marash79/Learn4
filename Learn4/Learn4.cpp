@@ -3,15 +3,69 @@
 
 #include <iostream>
 #include "SDL.h"
+SDL_Window* win=NULL;
+SDL_Renderer* ren=NULL;
 
+int win_witdh = 800, win_height = 600;
 
+void deInit(int error)
+{
+	if (ren != NULL) SDL_DestroyRenderer(ren);
+	if (win != NULL) SDL_DestroyWindow(win);
+	SDL_Quit();
+	exit(error);
+}
+
+int init()
+{
+	if (SDL_Init(SDL_INIT_VIDEO) != 0)
+	{
+
+		printf("COuldn't init SDL! Error %s", SDL_GetError());
+		system("pause");
+		SDL_Quit();
+		exit(1);
+	}
+	win = SDL_CreateWindow("This is my first CPP window", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, win_witdh, win_height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+	if (win == NULL) {
+		printf("COuldn't create window! Error %s", SDL_GetError());
+		system("pause");
+		SDL_Quit();
+		exit(1);
+	}
+	ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED);
+	if (ren == NULL) {
+		printf("COuldn't create Renderer! Error %s", SDL_GetError());
+		system("pause");
+		SDL_Quit();
+		exit(1);
+	}
+}
 
 int main(int argc, char* args[])
 {
-	SDL_Init(0);
+	init();
+	SDL_SetRenderDrawColor(ren,200,200,200,255);
+	SDL_RenderClear(ren);
+	SDL_SetRenderDrawColor(ren, 0, 0, 255, 255);
+	for (int i = 1; i < 200; i++)
+	{
+		SDL_RenderDrawLine(ren, 0, 0+i, win_witdh - 1, 0+i);
+		SDL_RenderDrawLine(ren, 0+i, 0, 0+i, win_height - 1);
+		SDL_RenderDrawLine(ren, win_witdh - 1-i, 0, win_witdh - 1-i, win_height - 1);
+		SDL_RenderDrawLine(ren, 0, win_height - 1-i, win_witdh - 1, win_height - 1-i);
+		SDL_RenderPresent(ren);
+		SDL_Delay(100);
+	}
+	SDL_Rect rect{ 0,0,0,0 };
 
-	SDL_Quit();
+	SDL_RenderDrawRect(ren, &rect);
+	SDL_RenderPresent(ren);
+
+	SDL_Delay(10000);
+	deInit(0);
 	return 0;
+
 }
 
 // Запуск программы: CTRL+F5 или меню "Отладка" > "Запуск без отладки"
