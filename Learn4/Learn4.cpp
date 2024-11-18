@@ -6,6 +6,28 @@
 SDL_Window* win=NULL;
 SDL_Renderer* ren=NULL;
 
+
+
+
+////for ordinary non-sdl calculation uncomment following lines:
+//bool CoordsConvert(const int * maxX,const int * maxY, const int& xBase, const int& yBase, int& x, int& y){
+// if (*maxX<0||*maxY<0||xBase<0||yBase<0) return false;/*check bad funcion call*/
+////for SDL implementation
+bool CoordsConvert(SDL_Window* window, const int& xBase, const int& yBase,int& x,int& y) {
+	if (window == nullptr||x<0|y<0) return false;/*check bad funcion call*/
+	int* maxX{ nullptr }, * maxY{ nullptr };
+	SDL_GetWindowSize(window, maxX,maxY);/*get relative max windows coords (w+1,h+1)*/
+
+	x = xBase + x;/*absolute x coordinates pre calculation*/
+	y= yBase - y ;/*absolute Y coordinates pre calculation*/
+
+	if (x<0 || y>*maxX || y<0 || y>*maxY) /*check relative coordinates in a window*/
+	{
+		return false;
+	}
+	return true;
+}
+
 int win_witdh = 800, win_height = 600;
 
 void deInit(int error)
@@ -45,24 +67,32 @@ int init()
 int main(int argc, char* args[])
 {
 	init();
-	SDL_SetRenderDrawColor(ren,200,200,200,255);
+	SDL_SetRenderDrawColor(ren, 200, 200, 200, 255);
 	SDL_RenderClear(ren);
 	SDL_SetRenderDrawColor(ren, 0, 0, 255, 255);
-	for (int i = 1; i < 200; i++)
-	{
-		SDL_RenderDrawLine(ren, 0, 0+i, win_witdh - 1, 0+i);
-		SDL_RenderDrawLine(ren, 0+i, 0, 0+i, win_height - 1);
-		SDL_RenderDrawLine(ren, win_witdh - 1-i, 0, win_witdh - 1-i, win_height - 1);
-		SDL_RenderDrawLine(ren, 0, win_height - 1-i, win_witdh - 1, win_height - 1-i);
+	int zeroX{ 100 }, zeroY{ 100 };
+	int finalX, finalY;
+	SDL_Rect bar;
+	bar.x = 25;
+	bar.y = 25;
+	bar.h = 3;
+	bar.w = 3;
+	
+	CoordsConvert(win, zeroX, zeroY, finalX, finalY);
+	
+		SDL_RenderDrawLine(ren, zeroX -50, zeroY, zeroX +50, zeroY);
+		SDL_RenderDrawLine(ren, zeroX, zeroY-50, zeroX, zeroY+50);
+		
+		SDL_RenderDrawRect(ren, &bar);
 		SDL_RenderPresent(ren);
 		SDL_Delay(100);
-	}
+	
 	SDL_Rect rect{ 0,0,0,0 };
 
 	SDL_RenderDrawRect(ren, &rect);
 	SDL_RenderPresent(ren);
 
-	SDL_Delay(10000);
+	SDL_Delay(1000);
 	deInit(0);
 	return 0;
 
