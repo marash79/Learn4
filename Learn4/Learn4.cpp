@@ -3,12 +3,9 @@
 
 #include <iostream>
 #include "SDL.h"
+
 SDL_Window* win=NULL;
 SDL_Renderer* ren=NULL;
-
-
-
-
 ////for ordinary non-sdl calculation uncomment following lines:
 //bool CoordsConvert(const int * maxX,const int * maxY, const int& xBase, const int& yBase, int& x, int& y){
 // if (*maxX<0||*maxY<0||xBase<0||yBase<0) return false;/*check bad funcion call*/
@@ -64,27 +61,64 @@ int init()
 	}
 }
 
+double circle(double x, double x0, double y0, double rad)
+{
+	return sqrt(rad * rad - (x - x0)*(x - x0)) + y0;
+}
+
+void mathCoordsToSctreen(double x, double y, double scale, int centerx, int centery, int& sx, int& sy)
+{
+	sx = round(centerx + x * scale);
+	sy = round(centery - y * scale);
+}
+
 int main(int argc, char* args[])
 {
 	init();
 	SDL_SetRenderDrawColor(ren, 200, 200, 200, 255);
 	SDL_RenderClear(ren);
-	SDL_SetRenderDrawColor(ren, 0, 0, 255, 255);
+	SDL_SetRenderDrawColor(ren, 255,0, 0, 200);
 	int zeroX{ 100 }, zeroY{ 100 };
 	int finalX, finalY;
-	SDL_Rect bar;
-	bar.x = 25;
-	bar.y = 25;
-	bar.h = 3;
-	bar.w = 3;
+	SDL_Rect bar = { 0,0,3,3 };
+	double scale = 2.0;
+	double x1, y1, x2, y2;
+	int sx1, sy1, sx2, sy2;
+	x1 = -100.0; x2 = 100.0;
+	y1 = 0; y2 = 0;
+	mathCoordsToSctreen(x1, y1, scale, win_witdh / 2, win_height / 2, sx1, sy1);
+	mathCoordsToSctreen(x2, y2, scale, win_witdh / 2, win_height / 2, sx2, sy2);
+	SDL_RenderDrawLine(ren, sx1, sy1, sx2, sy2);
+	y1 = -100.0; y2 = 100.0;
+	x1 = 0; x2 = 0;
+	mathCoordsToSctreen(x1, y1, scale, win_witdh / 2, win_height / 2, sx1, sy1);
+	mathCoordsToSctreen(x2, y2, scale, win_witdh / 2, win_height / 2, sx2, sy2);
+	SDL_RenderDrawLine(ren, sx1, sy1, sx2, sy2);
+
+	for (int x1 = -100; x1 <= 100; x1 += 10)
+	{
+		y1 = circle(x1, 0, 0, 100);	
+		mathCoordsToSctreen(x1, y1, scale, win_witdh / 2, win_height / 2, sx1, sy1);
+		//SDL_RenderDrawPoint(ren, x1, y1);
+		bar.x = sx1 - 1;
+		bar.y = sy1 - 1;
+		SDL_RenderFillRect(ren, &bar);
+		y1 = -y1;
+		mathCoordsToSctreen(x1, y1, scale, win_witdh / 2, win_height / 2, sx1, sy1);
+		bar.x = sx1 - 1;
+		bar.y = sy1 - 1;
+		SDL_RenderFillRect(ren, &bar);
+
+	}
+
 	
-	CoordsConvert(win, zeroX, zeroY, finalX, finalY);
+	/*CoordsConvert(win, zeroX, zeroY, finalX, finalY);
 	
 		SDL_RenderDrawLine(ren, zeroX -50, zeroY, zeroX +50, zeroY);
 		SDL_RenderDrawLine(ren, zeroX, zeroY-50, zeroX, zeroY+50);
 		
-		SDL_RenderDrawRect(ren, &bar);
-		SDL_RenderPresent(ren);
+		SDL_RenderDrawRect(ren, &bar);*/
+		
 		SDL_Delay(100);
 	
 	SDL_Rect rect{ 0,0,0,0 };
