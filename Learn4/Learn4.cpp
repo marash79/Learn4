@@ -95,9 +95,10 @@ int main(int argc, char* args[])
 	mathCoordsToSctreen(x2, y2, scale, win_witdh / 2, win_height / 2, sx2, sy2);
 	SDL_RenderDrawLine(ren, sx1, sy1, sx2, sy2);
 
-	for (int x1 = -100; x1 <= 100; x1 += 10)
+	for (double alpha = 0; alpha <= 360; alpha += 0.5)
 	{
-		y1 = circle(x1, 0, 0, 100);	
+		x1 = 100 * cos(alpha * M_PI / 180);
+		y1 = 100 * sin(alpha * M_PI / 180);
 		mathCoordsToSctreen(x1, y1, scale, win_witdh / 2, win_height / 2, sx1, sy1);
 		//SDL_RenderDrawPoint(ren, x1, y1);
 		bar.x = sx1 - 1;
