@@ -1,6 +1,6 @@
 ﻿// Learn4.cpp : Этот файл содержит функцию "main". Здесь начинается и заканчивается выполнение программы.
 //
-
+#define _USE_MATH_DEFINES
 #include <iostream>
 #include "SDL.h"
 
@@ -75,59 +75,98 @@ void mathCoordsToSctreen(double x, double y, double scale, int centerx, int cent
 int main(int argc, char* args[])
 {
 	init();
-	SDL_SetRenderDrawColor(ren, 200, 200, 200, 255);
-	SDL_RenderClear(ren);
-	SDL_SetRenderDrawColor(ren, 255,0, 0, 200);
-	int zeroX{ 100 }, zeroY{ 100 };
-	int finalX, finalY;
-	SDL_Rect bar = { 0,0,3,3 };
-	double scale = 2.0;
+	
+	double scale = 1.0;
 	double x1, y1, x2, y2;
 	int sx1, sy1, sx2, sy2;
-	x1 = -100.0; x2 = 100.0;
-	y1 = 0; y2 = 0;
-	mathCoordsToSctreen(x1, y1, scale, win_witdh / 2, win_height / 2, sx1, sy1);
-	mathCoordsToSctreen(x2, y2, scale, win_witdh / 2, win_height / 2, sx2, sy2);
-	SDL_RenderDrawLine(ren, sx1, sy1, sx2, sy2);
-	y1 = -100.0; y2 = 100.0;
-	x1 = 0; x2 = 0;
-	mathCoordsToSctreen(x1, y1, scale, win_witdh / 2, win_height / 2, sx1, sy1);
-	mathCoordsToSctreen(x2, y2, scale, win_witdh / 2, win_height / 2, sx2, sy2);
-	SDL_RenderDrawLine(ren, sx1, sy1, sx2, sy2);
-
-	for (double alpha = 0; alpha <= 360; alpha += 0.5)
-	{
-		x1 = 100 * cos(alpha * M_PI / 180);
-		y1 = 100 * sin(alpha * M_PI / 180);
-		mathCoordsToSctreen(x1, y1, scale, win_witdh / 2, win_height / 2, sx1, sy1);
-		//SDL_RenderDrawPoint(ren, x1, y1);
-		bar.x = sx1 - 1;
-		bar.y = sy1 - 1;
-		SDL_RenderFillRect(ren, &bar);
-		y1 = -y1;
-		mathCoordsToSctreen(x1, y1, scale, win_witdh / 2, win_height / 2, sx1, sy1);
-		bar.x = sx1 - 1;
-		bar.y = sy1 - 1;
-		SDL_RenderFillRect(ren, &bar);
-
-	}
-
-	
-	/*CoordsConvert(win, zeroX, zeroY, finalX, finalY);
-	
-		SDL_RenderDrawLine(ren, zeroX -50, zeroY, zeroX +50, zeroY);
-		SDL_RenderDrawLine(ren, zeroX, zeroY-50, zeroX, zeroY+50);
-		
-		SDL_RenderDrawRect(ren, &bar);*/
-		
-		SDL_Delay(100);
-	
 	SDL_Rect rect{ 0,0,0,0 };
+	int wanted_points = 3;
+	bool rising = true;
 
-	SDL_RenderDrawRect(ren, &rect);
-	SDL_RenderPresent(ren);
+	while (true)
+	{
 
-	SDL_Delay(1000);
+#pragma region DRAWING
+
+		SDL_SetRenderDrawColor(ren, 200, 200, 200, 255);
+		SDL_RenderClear(ren);
+		SDL_SetRenderDrawColor(ren, 255, 0, 0, 200);
+		int zeroX{ 100 }, zeroY{ 100 };
+		int finalX, finalY;
+
+		
+
+		x1 = -100.0; x2 = 100.0;
+		y1 = 0; y2 = 0;
+		mathCoordsToSctreen(x1, y1, scale, win_witdh / 2, win_height / 2, sx1, sy1);
+		mathCoordsToSctreen(x2, y2, scale, win_witdh / 2, win_height / 2, sx2, sy2);
+		SDL_RenderDrawLine(ren, sx1, sy1, sx2, sy2);
+		y1 = -100.0; y2 = 100.0;
+		x1 = 0; x2 = 0;
+		mathCoordsToSctreen(x1, y1, scale, win_witdh / 2, win_height / 2, sx1, sy1);
+		mathCoordsToSctreen(x2, y2, scale, win_witdh / 2, win_height / 2, sx2, sy2);
+		SDL_RenderDrawLine(ren, sx1, sy1, sx2, sy2);
+
+		//for (double alpha = 0; alpha <= 360; alpha += 0.5)
+		//{
+		//	x1 = 100 * cos(alpha * M_PI / 180);
+		//	y1 = 100 * sin(alpha * M_PI / 180);
+		//	mathCoordsToSctreen(x1, y1, scale, win_witdh / 2, win_height / 2, sx1, sy1);
+		//	SDL_RenderDrawPoint(ren, x1, y1);
+		//	bar.x = sx1 - 1;
+		//	bar.y = sy1 - 1;
+		//	SDL_RenderFillRect(ren, &bar);
+		//	y1 = -y1;
+		//	mathCoordsToSctreen(x1, y1, scale, win_witdh / 2, win_height / 2, sx1, sy1);
+		//	bar.x = sx1 - 1;
+		//	bar.y = sy1 - 1;
+		//	SDL_RenderFillRect(ren, &bar);
+
+		//}
+
+	
+
+		int point_count = wanted_points;
+		SDL_Point* points = (SDL_Point*)malloc(sizeof(SDL_Point) * (point_count + 1));
+
+		/*CoordsConvert(win, zeroX, zeroY, finalX, finalY);
+
+			SDL_RenderDrawLine(ren, zeroX -50, zeroY, zeroX +50, zeroY);
+			SDL_RenderDrawLine(ren, zeroX, zeroY-50, zeroX, zeroY+50);
+
+			SDL_RenderDrawRect(ren, &bar);*/
+		float alpha = 0;
+		for (int i = 0; i < point_count; i++)
+		{
+			alpha += 2 * M_PI / point_count;
+			mathCoordsToSctreen(200 * cos(alpha), 200 * sin(alpha),scale, win_witdh / 2, win_height / 2, points[i].x, points[i].y);
+		}
+		points[point_count] = points[0];
+
+
+		SDL_SetRenderDrawColor(ren, 255, 0, 0, 255);
+		SDL_RenderDrawLines(ren, points, point_count + 1);
+		
+
+
+		SDL_RenderDrawRect(ren, &rect);
+		free(points);
+
+		if (rising)
+			wanted_points++;
+		else
+			wanted_points--;
+		if (rising && wanted_points > 100 || !rising && wanted_points <= 3)
+			rising = !rising;
+#pragma endregion
+		
+		
+		SDL_RenderPresent(ren);
+
+		SDL_Delay(20);
+		
+		
+	}
 	deInit(0);
 	return 0;
 
