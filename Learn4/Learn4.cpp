@@ -3,6 +3,7 @@
 #define _USE_MATH_DEFINES
 #include <iostream>
 #include "SDL.h"
+#include "SDL_IMAGE.h"
 
 SDL_Window* win=NULL;
 SDL_Renderer* ren=NULL;
@@ -31,6 +32,7 @@ void deInit(int error)
 {
 	if (ren != NULL) SDL_DestroyRenderer(ren);
 	if (win != NULL) SDL_DestroyWindow(win);
+	IMG_Quit();
 	SDL_Quit();
 	exit(error);
 }
@@ -45,6 +47,17 @@ int init()
 		SDL_Quit();
 		exit(1);
 	}
+	int res;
+	if ((res=IMG_Init(IMG_INIT_PNG|IMG_INIT_JPG)) == 0)
+	{
+
+		printf("COuldn't init SDL IMAGE! Error %s", SDL_GetError());
+		system("pause");
+		SDL_Quit();
+		exit(1);
+	}
+	if (res & IMG_INIT_PNG) printf("Initialized PNG library.\n"); else printf("Couldn't Initialized PNG library.\n");
+	if (res & IMG_INIT_JPG) printf("Initialized JPG library.\n"); else printf("Couldn't Initialized JPG library.\n");
 	win = SDL_CreateWindow("This is my first CPP window", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, win_witdh, win_height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
 	if (win == NULL) {
 		printf("COuldn't create window! Error %s", SDL_GetError());
@@ -82,11 +95,50 @@ int main(int argc, char* args[])
 	SDL_Rect rect{ 0,0,0,0 };
 	int wanted_points = 3;
 	bool rising = true;
-
-	while (true)
+	bool isRunning = true;
+	SDL_Event ev;
+	int mouse_x = win_witdh / 2;
+	int mouse_y = win_height / 2;
+	while (isRunning)
 	{
-
-#pragma region DRAWING
+		while (SDL_PollEvent(&ev))
+		{
+			SDL_PollEvent(&ev);
+			switch (ev.type)
+			{
+			case SDL_QUIT:
+				isRunning = false;
+				break;
+			case SDL_WINDOWEVENT:
+				if (ev.window.event == SDL_WINDOWEVENT_RESIZED)
+				{
+					win_witdh = ev.window.data1;
+					win_height = ev.window.data2;
+				}
+				break;
+			case SDL_MOUSEBUTTONDOWN:
+				if (ev.button.button == SDL_BUTTON_LEFT)
+				{
+					mouse_x = ev.button.x;
+					mouse_y = ev.button.y;
+				}
+				break;
+			/*case SDL_MOUSEWHEEL:
+				if (ev.wheel.y > 0)
+					scale += 0.1;
+				else scale -= 0.1;
+				break;*/
+			case SDL_KEYDOWN:
+				switch (ev.key.keysym.scancode)
+				{
+				case SDL_SCANCODE_ESCAPE:
+					isRunning = false;
+					break;
+				}
+				break;
+			}
+		}
+	#pragma region DRAWING
 
 		SDL_SetRenderDrawColor(ren, 200, 200, 200, 255);
 		SDL_RenderClear(ren);
@@ -98,13 +150,13 @@ int main(int argc, char* args[])
 
 		x1 = -100.0; x2 = 100.0;
 		y1 = 0; y2 = 0;
-		mathCoordsToSctreen(x1, y1, scale, win_witdh / 2, win_height / 2, sx1, sy1);
-		mathCoordsToSctreen(x2, y2, scale, win_witdh / 2, win_height / 2, sx2, sy2);
+		mathCoordsToSctreen(x1, y1, scale, mouse_x, mouse_y, sx1, sy1);
+		mathCoordsToSctreen(x2, y2, scale, mouse_x , mouse_y, sx2, sy2);
 		SDL_RenderDrawLine(ren, sx1, sy1, sx2, sy2);
 		y1 = -100.0; y2 = 100.0;
 		x1 = 0; x2 = 0;
-		mathCoordsToSctreen(x1, y1, scale, win_witdh / 2, win_height / 2, sx1, sy1);
-		mathCoordsToSctreen(x2, y2, scale, win_witdh / 2, win_height / 2, sx2, sy2);
+		mathCoordsToSctreen(x1, y1, scale, mouse_x, mouse_y, sx1, sy1);
+		mathCoordsToSctreen(x2, y2, scale, mouse_x, mouse_y, sx2, sy2);
 		SDL_RenderDrawLine(ren, sx1, sy1, sx2, sy2);
 
 		//for (double alpha = 0; alpha <= 360; alpha += 0.5)
@@ -139,7 +191,7 @@ int main(int argc, char* args[])
 		for (int i = 0; i < point_count; i++)
 		{
 			alpha += 2 * M_PI / point_count;
-			mathCoordsToSctreen(200 * cos(alpha), 200 * sin(alpha),scale, win_witdh / 2, win_height / 2, points[i].x, points[i].y);
+			mathCoordsToSctreen(200 * cos(alpha), 200 * sin(alpha),scale, mouse_x, mouse_y, points[i].x, points[i].y);
 		}
 		points[point_count] = points[0];
 
@@ -163,7 +215,7 @@ int main(int argc, char* args[])
 		
 		SDL_RenderPresent(ren);
 
-		SDL_Delay(20);
+		SDL_Delay(30);
 		
 		
 	}
